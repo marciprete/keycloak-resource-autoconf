@@ -75,7 +75,6 @@ public class KeycloakResourceAutoConfiguration {
                     List<RequestMethod> httpMethods = Arrays.asList(requestMappingOnMethod.method());
 
                     paths.forEach(path -> {
-                        //TODO: simplify this iteration
                         httpMethods.forEach(verb -> {
                             methodPaths.forEach(methodPath -> {
                                 String policyEnforcmentPath = buildHttpPath(path, methodPath);

@@ -5,7 +5,22 @@
 
     <groupId>it.maconsulting.keycloak</groupId>
     <artifactId>keycloak-resource-autoconf</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
+
+    <name>Keycloak Resource Autoconfigurator</name>
+    <description>Automatic configuration annotation to enable autodiscovery of Keycloak policy enforcement
+        endpoints for spring-boot based resource servers</description>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <url>https://github.com/marciprete/keycloak-resource-autoconf</url>
+    </scm>
 
     <properties>
         <maven.compiler.target>11</maven.compiler.target>
