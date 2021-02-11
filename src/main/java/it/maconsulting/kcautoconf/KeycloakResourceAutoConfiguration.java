@@ -40,6 +40,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
+ * This is the implementation of the autoconfig annotation.
+ * It integrates the {@link org.keycloak.adapters.springboot.KeycloakSpringBootProperties} and performs the automatic
+ * resources and scopes configuration.<br>
+ * The process is additive and not destructive. It means that if a policy-enforcement configuration section is present
+ * in the application.properties or application.yaml file, it is kept.
+ *
  * @author Michele Arciprete
  * @since 1.0-SNAPSHOT
  */

@@ -21,6 +21,9 @@ import org.springframework.context.annotation.Import;
 import java.lang.annotation.*;
 
 /**
+ * Enables the autoconfiguration of the Resource Server by scanning the @{@link org.springframework.web.bind.annotation.RestController}
+ * annotated classes.
+ *
  * @author Michele Arciprete
  * @since 1.0-SNAPSHOT
  */
