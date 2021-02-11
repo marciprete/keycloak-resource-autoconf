@@ -30,6 +30,16 @@ and make use of the following:
 * RestController annotations
 * Keycloak spring-boot adapter
 
+## Installation
+Just add it as maven dependency:
+```
+<dependency>
+  <groupId>it.maconsultingitalia.keycloak</groupId>
+  <artifactId>keycloak-resource-autoconf</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
 ## How it works
 Any controller annotated with `@RestController` is scanned from the autoconfigurator, then all its methods are parsed too,
 searching for any `@RequestMapping` alias.
