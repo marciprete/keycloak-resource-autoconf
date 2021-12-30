@@ -15,9 +15,8 @@
  */
 package it.maconsulting.kcautoconf;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
 import org.slf4j.Logger;
@@ -73,7 +72,7 @@ public class KeycloakResourceAutoConfiguration {
 
             log.debug("Parsing controller {}", name);
             Arrays.asList(targetClass.getDeclaredMethods()).forEach(method -> {
-                final ApiOperation apiOperationAnnotation = AnnotationUtils.getAnnotation(method, ApiOperation.class);
+                final Operation apiOperationAnnotation = AnnotationUtils.getAnnotation(method, Operation.class);
                 final RequestMapping requestMappingOnMethod = AnnotationUtils.getAnnotation(method, RequestMapping.class);
                 if (requestMappingOnMethod != null /*&& apiOperationAnnotation != null*/) {
                     log.trace("Found method: {}", method);
@@ -92,11 +91,11 @@ public class KeycloakResourceAutoConfiguration {
                                 methodConfig.setMethod(verb.name());
                                 List<String> scopeNames = new ArrayList<>();
                                 if (apiOperationAnnotation != null) {
-                                    List<AuthorizationScope[]> scopes = Arrays.stream(apiOperationAnnotation.authorizations()).map(Authorization::scopes).collect(Collectors.toList());
+                                    List<String[]> scopes = Arrays.stream(apiOperationAnnotation.security()).map(SecurityRequirement::scopes).collect(Collectors.toList());
                                     scopes.forEach(a -> Arrays.stream(a).forEach(scope -> {
-                                        if (!scope.scope().isBlank()) {
-                                            log.debug("Found authorization scope: {}", scope.scope());
-                                            scopeNames.add(scope.scope());
+                                        if (!scope.isBlank()) {
+                                            log.debug("Found authorization scope: {}", scope);
+                                            scopeNames.add(scope);
                                         }
                                     }));
                                     methodConfig.setScopes(scopeNames);

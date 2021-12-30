@@ -17,11 +17,12 @@ package it.maconsulting.kcautoconf;
 
 import it.maconsulting.kcautoconf.fixtures.*;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
 import java.util.HashMap;
@@ -32,6 +33,7 @@ import java.util.Map;
  * @author Michele Arciprete
  * @since 1.0-SNAPSHOT
  */
+@ExtendWith(MockitoExtension.class)
 class KeycloakResourceAutoConfigurationTest {
 
     @Spy
@@ -39,11 +41,6 @@ class KeycloakResourceAutoConfigurationTest {
 
     @InjectMocks
     private KeycloakResourceAutoConfiguration sut;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     void givenControllerWithAuthzScopes_resourcesAreCreated() throws Exception {

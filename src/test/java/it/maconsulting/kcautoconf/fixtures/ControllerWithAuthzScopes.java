@@ -15,9 +15,8 @@
  */
 package it.maconsulting.kcautoconf.fixtures;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.Authorization;
-import io.swagger.annotations.AuthorizationScope;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,13 +30,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class ControllerWithAuthzScopes {
 
     @GetMapping
-    @ApiOperation(
-            nickname = "GET",
-            value = "get",
-            authorizations = {
-                    @Authorization(
-                            value = "get",
-                            scopes = {@AuthorizationScope(scope = "entity:read", description = "read entity")})
+    @Operation(
+            summary = "GET",
+            security = {
+                    @SecurityRequirement(
+                            name = "get",
+                            scopes = "entity:read")
             })
     public void get() {}
 }
