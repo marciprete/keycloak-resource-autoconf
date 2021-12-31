@@ -82,13 +82,12 @@ The same happens if the method mapping has more than one path.
 public Class AuthzController {
 
     @GetMapping
-    @ApiOperation(
-            nickname = "getEntity",
-            value = "Read my awesome entity",
-            authorizations = {
-                    @Authorization(
-                            value = "get",
-                            scopes = {@AuthorizationScope(scope = "entity:read", description = "read entity")})
+    @Operation(
+            summary = "Read my awesome entity",
+            security = {
+                    @SecurityRequirement(
+                            name = "get",
+                            scopes = "entity:read")
             })
     public ResponseEntity<String> getString() { ... }
 
