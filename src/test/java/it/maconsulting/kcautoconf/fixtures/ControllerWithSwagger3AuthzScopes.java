@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("authorized")
-public class ControllerWithAuthzScopes {
+public class ControllerWithSwagger3AuthzScopes {
 
     @GetMapping
     @Operation(

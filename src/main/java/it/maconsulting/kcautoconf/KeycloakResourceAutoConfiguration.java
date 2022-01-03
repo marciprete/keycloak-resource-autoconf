@@ -15,8 +15,6 @@
  */
 package it.maconsulting.kcautoconf;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
 import org.slf4j.Logger;
@@ -29,14 +27,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.core.annotation.MergedAnnotations;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * This is the implementation of the autoconfig annotation.
@@ -72,9 +69,11 @@ public class KeycloakResourceAutoConfiguration {
 
             log.debug("Parsing controller {}", name);
             Arrays.asList(targetClass.getDeclaredMethods()).forEach(method -> {
-                final Operation apiOperationAnnotation = AnnotationUtils.getAnnotation(method, Operation.class);
+                final MergedAnnotations mergedAnnotations = MergedAnnotations.from(method);
+                final SecuredOperationFactory securedOperationFactory = new SecuredOperationFactory();
+                final Optional<SecuredOperation> operation = securedOperationFactory.getSecuredAnnotation(mergedAnnotations);
                 final RequestMapping requestMappingOnMethod = AnnotationUtils.getAnnotation(method, RequestMapping.class);
-                if (requestMappingOnMethod != null /*&& apiOperationAnnotation != null*/) {
+                if (requestMappingOnMethod != null) {
                     log.trace("Found method: {}", method);
                     List<String> methodPaths = extractExtraPathsFromClassMethod(requestMappingOnMethod, method);
                     List<RequestMethod> httpMethods = Arrays.asList(requestMappingOnMethod.method());
@@ -89,16 +88,8 @@ public class KeycloakResourceAutoConfiguration {
                                 pathConfig.setPath(policyEnforcmentPath);
                                 PolicyEnforcerConfig.MethodConfig methodConfig = new PolicyEnforcerConfig.MethodConfig();
                                 methodConfig.setMethod(verb.name());
-                                List<String> scopeNames = new ArrayList<>();
-                                if (apiOperationAnnotation != null) {
-                                    List<String[]> scopes = Arrays.stream(apiOperationAnnotation.security()).map(SecurityRequirement::scopes).collect(Collectors.toList());
-                                    scopes.forEach(a -> Arrays.stream(a).forEach(scope -> {
-                                        if (!scope.isBlank()) {
-                                            log.debug("Found authorization scope: {}", scope);
-                                            scopeNames.add(scope);
-                                        }
-                                    }));
-                                    methodConfig.setScopes(scopeNames);
+                                if (operation.isPresent()) {
+                                    methodConfig.setScopes(operation.get().getScopes());
                                 }
                                 pathConfig.getMethods().add(methodConfig);
                                 keycloakSpringBootProperties.getPolicyEnforcerConfig().getPaths().add(pathConfig);

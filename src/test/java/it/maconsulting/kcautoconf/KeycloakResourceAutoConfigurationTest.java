@@ -43,9 +43,31 @@ class KeycloakResourceAutoConfigurationTest {
     private KeycloakResourceAutoConfiguration sut;
 
     @Test
-    void givenControllerWithAuthzScopes_resourcesAreCreated() throws Exception {
+    void givenControllerWithSwagger3AuthzScopes_resourcesAreCreated() throws Exception {
         Map<String, Object> beansWithAnnotation = new HashMap<>();
-        beansWithAnnotation.put("ControllerWithAuthzScopes", new ControllerWithAuthzScopes());
+        beansWithAnnotation.put("ControllerWithSwagger3AuthzScopes", new ControllerWithSwagger3AuthzScopes());
+
+        Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+
+        KeycloakSpringBootProperties properties = sut.kcProperties();
+        Assertions.assertNotNull(properties);
+        Assertions.assertNotNull(properties.getPolicyEnforcerConfig());
+        List<PolicyEnforcerConfig.PathConfig> paths = properties.getPolicyEnforcerConfig().getPaths();
+        Assertions.assertNotNull(paths);
+        Assertions.assertFalse(paths.isEmpty());
+        Assertions.assertEquals(1, paths.size());
+        paths.forEach(path -> {
+            Assertions.assertEquals("/authorized", path.getPath());
+
+            Assertions.assertEquals(1, path.getMethods().get(0).getScopes().size());
+            Assertions.assertEquals("entity:read", path.getMethods().get(0).getScopes().get(0));
+        });
+    }
+
+    @Test
+    void givenControllerWithSwagger2AuthzScopes_resourcesAreCreated() throws Exception {
+        Map<String, Object> beansWithAnnotation = new HashMap<>();
+        beansWithAnnotation.put("ControllerWithSwagger2AuthzScopes", new ControllerWithSwagger2AuthzScopes());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
 

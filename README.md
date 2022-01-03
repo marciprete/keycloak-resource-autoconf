@@ -1,4 +1,4 @@
-# Keycloak Rescource Autoconfigurator for Spring Boot 2 
+# Keycloak Resource Autoconfigurator for Spring Boot 2 
 
 [Keycloak](https://www.keycloak.org) is an Open Source Identity and Access Management solution for modern Applications and Services.
 
@@ -20,7 +20,9 @@ Anyway, this approach can lead to a lot of configuration, possible duplications 
 and possibly errors.
   
 The aim of this project is to provide an automatic configuration process, based on the Swagger api annotations and on the 
- Spring web annotations, to have one single configuration point. 
+ Spring web annotations, to have one single configuration point.
+
+The current version supports both Swagger 2 and Swagger 3
 
 
 ## Requirements
@@ -76,7 +78,24 @@ Regardless of the trailing slash in the `@RequestMapping`, the configurator will
 `/foo` and `/bar`
 The same happens if the method mapping has more than one path.
 
-##### Auth Scope Based Controller
+##### Auth Scope Based Controller with Swagger 2
+```
+@RestController
+public Class AuthzController {
+
+    @GetMapping
+    @ApiOperation(
+            nickname = "getEntity",
+            value = "Read my awesome entity",
+            authorizations = {
+                    @Authorization(
+                            value = "get",
+                            scopes = {@AuthorizationScope(scope = "entity:read", description = "read entity")})
+            })
+    public ResponseEntity<String> getString() { ... }
+
+}
+##### Auth Scope Based Controller with Swagger 3
 ```
 @RestController
 public Class AuthzController {
