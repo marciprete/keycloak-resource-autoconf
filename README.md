@@ -95,6 +95,8 @@ public Class AuthzController {
     public ResponseEntity<String> getString() { ... }
 
 }
+```
+
 ##### Auth Scope Based Controller with Swagger 3
 ```
 @RestController
@@ -112,7 +114,8 @@ public Class AuthzController {
 
 }
 ```
-This example will produce the equivalent of the yaml
+
+This example will produce the equivalent of the following yaml:
 ```
 keycloak:
   ...
@@ -129,4 +132,3 @@ keycloak:
 ## Known limitations
 At the moment, the endpoints are added only if the methods are mapped with @GetMapping, @PostMapping, @PutMapping etc.
 If the method is annotated via @RequestMapping, then the http verb is not inferred thus the endpoint is not added. 
-   
