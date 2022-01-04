@@ -16,6 +16,9 @@
 package it.maconsulting.kcautoconf;
 
 import it.maconsulting.kcautoconf.fixtures.*;
+import it.maconsulting.kcautoconf.services.SwaggerOperationService;
+import it.maconsulting.kcautoconf.services.SwaggerV2OperationService;
+import it.maconsulting.kcautoconf.services.SwaggerV3OperationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +28,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,13 +43,48 @@ class KeycloakResourceAutoConfigurationTest {
     @Spy
     private ApplicationContext context;
 
+    @Spy
+    private ArrayList<SwaggerOperationService> swaggerOperationServices;
+
+    @Spy
+    private SwaggerV2OperationService swaggerV2OperationService;
+
+    @Spy
+    private SwaggerV3OperationService swaggerV3OperationService;
+
     @InjectMocks
     private KeycloakResourceAutoConfiguration sut;
 
     @Test
-    void givenControllerWithAuthzScopes_resourcesAreCreated() throws Exception {
+    void givenV2ControllerWithAuthzScopes_resourcesAreCreated() {
+        swaggerOperationServices.add(swaggerV2OperationService);
+
         Map<String, Object> beansWithAnnotation = new HashMap<>();
-        beansWithAnnotation.put("ControllerWithAuthzScopes", new ControllerWithAuthzScopes());
+        beansWithAnnotation.put("ControllerWithAuthzScopes", new ControllerV2WithAuthzScopes());
+
+        Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+
+        KeycloakSpringBootProperties properties = sut.kcProperties();
+        Assertions.assertNotNull(properties);
+        Assertions.assertNotNull(properties.getPolicyEnforcerConfig());
+        List<PolicyEnforcerConfig.PathConfig> paths = properties.getPolicyEnforcerConfig().getPaths();
+        Assertions.assertNotNull(paths);
+        Assertions.assertFalse(paths.isEmpty());
+        Assertions.assertEquals(1, paths.size());
+        paths.forEach(path -> {
+            Assertions.assertEquals("/authorized", path.getPath());
+
+            Assertions.assertEquals(1, path.getMethods().get(0).getScopes().size());
+            Assertions.assertEquals("entity:read", path.getMethods().get(0).getScopes().get(0));
+        });
+    }
+
+    @Test
+    void givenV3ControllerWithAuthzScopes_resourcesAreCreated() {
+        swaggerOperationServices.add(swaggerV3OperationService);
+
+        Map<String, Object> beansWithAnnotation = new HashMap<>();
+        beansWithAnnotation.put("ControllerWithAuthzScopes", new ControllerV3WithAuthzScopes());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
 

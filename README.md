@@ -1,4 +1,4 @@
-# Keycloak Rescource Autoconfigurator for Spring Boot 2 
+# Keycloak Resource Autoconfigurator for Spring Boot 2 
 
 [Keycloak](https://www.keycloak.org) is an Open Source Identity and Access Management solution for modern Applications and Services.
 
@@ -20,13 +20,13 @@ Anyway, this approach can lead to a lot of configuration, possible duplications 
 and possibly errors.
   
 The aim of this project is to provide an automatic configuration process, based on the Swagger api annotations and on the 
- Spring web annotations, to have one single configuration point. 
+ Spring web annotations, to have one single configuration point.
 
 
 ## Requirements
 To take advantage of the autoconfiguration process, the resource server application must be a based on SpringBoot 2, 
 and make use of the following:
-* Swagger annotations
+* Swagger annotations (v1.5 or v2)
 * RestController annotations
 * Keycloak spring-boot adapter
 
@@ -36,7 +36,7 @@ Just add it as maven dependency:
 <dependency>
   <groupId>it.maconsultingitalia.keycloak</groupId>
   <artifactId>keycloak-resource-autoconf</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.1</version>
 </dependency>
 ```
 
@@ -45,7 +45,7 @@ Any controller annotated with `@RestController` is scanned from the autoconfigur
 searching for any `@RequestMapping` alias.
 The found endpoints are added to the `KeycloakSpringBootProperties`, in the policyEnforcementConfigurations.
 Since the bean is lazy loaded, the configurations in the application.properties or application.yml files are kept.
-The authorization scopes defined within the `@ApiOperation` annotation are added too, according to the http verb of the 
+The authorization scopes defined within the `@ApiOperation` or `@Operation` annotations are added too, according to the http verb of the 
 annotated method. This means that if the rest controllers are correctly annotated with swagger, no extra configuration is required.
 
 ## Examples
@@ -76,7 +76,7 @@ Regardless of the trailing slash in the `@RequestMapping`, the configurator will
 `/foo` and `/bar`
 The same happens if the method mapping has more than one path.
 
-##### Auth Scope Based Controller
+##### Auth Scope Based Controller (Swagger v3 / Annotations v2)
 ```
 @RestController
 public Class AuthzController {
@@ -88,6 +88,38 @@ public Class AuthzController {
                     @SecurityRequirement(
                             name = "get",
                             scopes = "entity:read")
+            })
+    public ResponseEntity<String> getString() { ... }
+
+}
+```
+This example will produce the equivalent of the yaml
+```
+keycloak:
+  ...
+  policy-enforcer-config:
+      enforcement-mode: ENFORCING
+      paths:
+        - path: /
+          methods:
+            - method: GET
+              scopes:
+                - entity:read
+```
+
+##### Auth Scope Based Controller (Swagger v2 / Annotations v1.5)
+```
+@RestController
+public Class AuthzController {
+
+    @GetMapping
+    @ApiOperation(
+            nickname = "getEntity",
+            value = "Read my awesome entity",
+            authorizations = {
+                    @Authorization(
+                            value = "get",
+                            scopes = {@AuthorizationScope(scope = "entity:read", description = "read entity")})
             })
     public ResponseEntity<String> getString() { ... }
 

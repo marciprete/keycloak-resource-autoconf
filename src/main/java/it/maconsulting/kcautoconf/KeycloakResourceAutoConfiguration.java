@@ -15,8 +15,7 @@
  */
 package it.maconsulting.kcautoconf;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import it.maconsulting.kcautoconf.services.SwaggerOperationService;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
 import org.slf4j.Logger;
@@ -36,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +55,9 @@ public class KeycloakResourceAutoConfiguration {
     @Autowired
     private ApplicationContext context;
 
+    @Autowired
+    private List<SwaggerOperationService> swaggerOperationServices;
+
     @Bean
     @Primary
     public KeycloakSpringBootProperties kcProperties() {
@@ -72,9 +75,8 @@ public class KeycloakResourceAutoConfiguration {
 
             log.debug("Parsing controller {}", name);
             Arrays.asList(targetClass.getDeclaredMethods()).forEach(method -> {
-                final Operation apiOperationAnnotation = AnnotationUtils.getAnnotation(method, Operation.class);
                 final RequestMapping requestMappingOnMethod = AnnotationUtils.getAnnotation(method, RequestMapping.class);
-                if (requestMappingOnMethod != null /*&& apiOperationAnnotation != null*/) {
+                if (requestMappingOnMethod != null) {
                     log.trace("Found method: {}", method);
                     List<String> methodPaths = extractExtraPathsFromClassMethod(requestMappingOnMethod, method);
                     List<RequestMethod> httpMethods = Arrays.asList(requestMappingOnMethod.method());
@@ -82,23 +84,20 @@ public class KeycloakResourceAutoConfiguration {
                     paths.forEach(path -> {
                         httpMethods.forEach(verb -> {
                             methodPaths.forEach(methodPath -> {
-                                String policyEnforcmentPath = buildHttpPath(path, methodPath);
-                                log.debug("Configuring {} request for path: {}", verb, policyEnforcmentPath);
+                                String policyEnforcementPath = buildHttpPath(path, methodPath);
+                                log.debug("Configuring {} request for path: {}", verb, policyEnforcementPath);
 
                                 PolicyEnforcerConfig.PathConfig pathConfig = new PolicyEnforcerConfig.PathConfig();
-                                pathConfig.setPath(policyEnforcmentPath);
+                                pathConfig.setPath(policyEnforcementPath);
                                 PolicyEnforcerConfig.MethodConfig methodConfig = new PolicyEnforcerConfig.MethodConfig();
                                 methodConfig.setMethod(verb.name());
-                                List<String> scopeNames = new ArrayList<>();
-                                if (apiOperationAnnotation != null) {
-                                    List<String[]> scopes = Arrays.stream(apiOperationAnnotation.security()).map(SecurityRequirement::scopes).collect(Collectors.toList());
-                                    scopes.forEach(a -> Arrays.stream(a).forEach(scope -> {
-                                        if (!scope.isBlank()) {
-                                            log.debug("Found authorization scope: {}", scope);
-                                            scopeNames.add(scope);
-                                        }
-                                    }));
-                                    methodConfig.setScopes(scopeNames);
+                                List<String> scopes = swaggerOperationServices.stream()
+                                        .flatMap(service -> service.getScopes(method).stream())
+                                        .collect(Collectors.toList());
+                                if (!scopes.isEmpty()) {
+                                    scopes.stream().filter(Predicate.not(String::isBlank))
+                                            .forEach(scope -> log.debug("Found authorization scope: {}", scope));
+                                    methodConfig.setScopes(scopes);
                                 }
                                 pathConfig.getMethods().add(methodConfig);
                                 keycloakSpringBootProperties.getPolicyEnforcerConfig().getPaths().add(pathConfig);
