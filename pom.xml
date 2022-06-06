@@ -5,7 +5,7 @@
 
     <groupId>it.maconsultingitalia.keycloak</groupId>
     <artifactId>keycloak-resource-autoconf</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
 
     <name>Keycloak Resource Autoconfigurator</name>
     <description>Automatic configuration annotation to enable autodiscovery of Keycloak policy enforcement
@@ -42,7 +42,7 @@
         <spring.version>5.3.14</spring.version>
         <slf4j.version>1.7.32</slf4j.version>
         <logback.version>1.2.10</logback.version>
-        <swagger-annotations.version>1.5.20</swagger-annotations.version>
+        <swagger-annotations.version>1.6.4</swagger-annotations.version>
         <swagger3-annotations.version>2.1.12</swagger3-annotations.version>
         <junit.version>5.8.2</junit.version>
         <spring-test.version>2.6.1</spring-test.version>

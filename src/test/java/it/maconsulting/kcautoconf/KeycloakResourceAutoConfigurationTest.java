@@ -16,6 +16,9 @@
 package it.maconsulting.kcautoconf;
 
 import it.maconsulting.kcautoconf.fixtures.*;
+import it.maconsulting.kcautoconf.services.SwaggerOperationService;
+import it.maconsulting.kcautoconf.services.SwaggerV2OperationService;
+import it.maconsulting.kcautoconf.services.SwaggerV3OperationService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +28,7 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,13 +43,24 @@ class KeycloakResourceAutoConfigurationTest {
     @Spy
     private ApplicationContext context;
 
+    @Spy
+    private ArrayList<SwaggerOperationService> swaggerOperationServices;
+
+    @Spy
+    private SwaggerV2OperationService swaggerV2OperationService;
+
+    @Spy
+    private SwaggerV3OperationService swaggerV3OperationService;
+
     @InjectMocks
     private KeycloakResourceAutoConfiguration sut;
 
     @Test
-    void givenControllerWithSwagger3AuthzScopes_resourcesAreCreated() throws Exception {
+    void givenV2ControllerWithAuthzScopes_resourcesAreCreated() {
+        swaggerOperationServices.add(swaggerV2OperationService);
+
         Map<String, Object> beansWithAnnotation = new HashMap<>();
-        beansWithAnnotation.put("ControllerWithSwagger3AuthzScopes", new ControllerWithSwagger3AuthzScopes());
+        beansWithAnnotation.put("ControllerWithAuthzScopes", new ControllerV2WithAuthzScopes());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
 
@@ -65,9 +80,11 @@ class KeycloakResourceAutoConfigurationTest {
     }
 
     @Test
-    void givenControllerWithSwagger2AuthzScopes_resourcesAreCreated() throws Exception {
+    void givenV3ControllerWithAuthzScopes_resourcesAreCreated() {
+        swaggerOperationServices.add(swaggerV3OperationService);
+
         Map<String, Object> beansWithAnnotation = new HashMap<>();
-        beansWithAnnotation.put("ControllerWithSwagger2AuthzScopes", new ControllerWithSwagger2AuthzScopes());
+        beansWithAnnotation.put("ControllerWithAuthzScopes", new ControllerV3WithAuthzScopes());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
 

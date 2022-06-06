@@ -22,13 +22,11 @@ and possibly errors.
 The aim of this project is to provide an automatic configuration process, based on the Swagger api annotations and on the 
  Spring web annotations, to have one single configuration point.
 
-The current version supports both Swagger 2 and Swagger 3
-
 
 ## Requirements
 To take advantage of the autoconfiguration process, the resource server application must be a based on SpringBoot 2, 
 and make use of the following:
-* Swagger annotations
+* Swagger annotations (v1.5 or v2)
 * RestController annotations
 * Keycloak spring-boot adapter
 
@@ -38,7 +36,7 @@ Just add it as maven dependency:
 <dependency>
   <groupId>it.maconsultingitalia.keycloak</groupId>
   <artifactId>keycloak-resource-autoconf</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.1</version>
 </dependency>
 ```
 
@@ -47,7 +45,7 @@ Any controller annotated with `@RestController` is scanned from the autoconfigur
 searching for any `@RequestMapping` alias.
 The found endpoints are added to the `KeycloakSpringBootProperties`, in the policyEnforcementConfigurations.
 Since the bean is lazy loaded, the configurations in the application.properties or application.yml files are kept.
-The authorization scopes defined within the `@ApiOperation` annotation are added too, according to the http verb of the 
+The authorization scopes defined within the `@ApiOperation` or `@Operation` annotations are added too, according to the http verb of the 
 annotated method. This means that if the rest controllers are correctly annotated with swagger, no extra configuration is required.
 
 ## Examples
@@ -78,7 +76,38 @@ Regardless of the trailing slash in the `@RequestMapping`, the configurator will
 `/foo` and `/bar`
 The same happens if the method mapping has more than one path.
 
-##### Auth Scope Based Controller with Swagger 2
+##### Auth Scope Based Controller (Swagger v3 / Annotations v2)
+```
+@RestController
+public Class AuthzController {
+
+    @GetMapping
+    @Operation(
+            summary = "Read my awesome entity",
+            security = {
+                    @SecurityRequirement(
+                            name = "get",
+                            scopes = "entity:read")
+            })
+    public ResponseEntity<String> getString() { ... }
+
+}
+```
+This example will produce the equivalent of the yaml
+```
+keycloak:
+  ...
+  policy-enforcer-config:
+      enforcement-mode: ENFORCING
+      paths:
+        - path: /
+          methods:
+            - method: GET
+              scopes:
+                - entity:read
+```
+
+##### Auth Scope Based Controller (Swagger v2 / Annotations v1.5)
 ```
 @RestController
 public Class AuthzController {
@@ -96,26 +125,7 @@ public Class AuthzController {
 
 }
 ```
-
-##### Auth Scope Based Controller with Swagger 3
-```
-@RestController
-public Class AuthzController {
-
-    @GetMapping
-    @Operation(
-            summary = "Read my awesome entity",
-            security = {
-                    @SecurityRequirement(
-                            name = "get",
-                            scopes = "entity:read")
-            })
-    public ResponseEntity<String> getString() { ... }
-
-}
-```
-
-This example will produce the equivalent of the following yaml:
+This example will produce the equivalent of the yaml
 ```
 keycloak:
   ...
@@ -132,3 +142,4 @@ keycloak:
 ## Known limitations
 At the moment, the endpoints are added only if the methods are mapped with @GetMapping, @PostMapping, @PutMapping etc.
 If the method is annotated via @RequestMapping, then the http verb is not inferred thus the endpoint is not added. 
+   
