@@ -16,15 +16,18 @@
 package it.maconsulting.kcautoconf;
 
 import it.maconsulting.kcautoconf.fixtures.*;
+import it.maconsulting.kcautoconf.services.AutoconfigurationService;
 import it.maconsulting.kcautoconf.services.SwaggerOperationService;
 import it.maconsulting.kcautoconf.services.SwaggerV2OperationService;
 import it.maconsulting.kcautoconf.services.SwaggerV3OperationService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
-import org.mockito.*;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
@@ -52,8 +55,20 @@ class KeycloakResourceAutoConfigurationTest {
     @Spy
     private SwaggerV3OperationService swaggerV3OperationService;
 
-    @InjectMocks
+    private AutoconfigurationService autoconfigurationService;
+
     private KeycloakResourceAutoConfiguration sut;
+
+
+    @BeforeEach
+    public void setup() {
+        KeycloakSpringBootProperties keycloakSpringBootProperties = new KeycloakSpringBootProperties();
+        PolicyEnforcerConfig policyEnforcerConfig = new PolicyEnforcerConfig();
+        keycloakSpringBootProperties.setPolicyEnforcerConfig(policyEnforcerConfig);
+
+        autoconfigurationService = new AutoconfigurationService(context, keycloakSpringBootProperties, swaggerOperationServices);
+        sut = new KeycloakResourceAutoConfiguration(autoconfigurationService);
+    }
 
     @Test
     void givenV2ControllerWithAuthzScopes_resourcesAreCreated() {
@@ -63,6 +78,7 @@ class KeycloakResourceAutoConfigurationTest {
         beansWithAnnotation.put("ControllerWithAuthzScopes", new ControllerV2WithAuthzScopes());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
@@ -73,9 +89,9 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertEquals(1, paths.size());
         paths.forEach(path -> {
             Assertions.assertEquals("/authorized", path.getPath());
-
             Assertions.assertEquals(1, path.getMethods().get(0).getScopes().size());
             Assertions.assertEquals("entity:read", path.getMethods().get(0).getScopes().get(0));
+            Assertions.assertEquals("Entity Reader", path.getName());
         });
     }
 
@@ -88,6 +104,8 @@ class KeycloakResourceAutoConfigurationTest {
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
 
+        autoconfigurationService.updateKeycloakConfiguration();
+
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
         Assertions.assertNotNull(properties.getPolicyEnforcerConfig());
@@ -97,18 +115,19 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertEquals(1, paths.size());
         paths.forEach(path -> {
             Assertions.assertEquals("/authorized", path.getPath());
-
             Assertions.assertEquals(1, path.getMethods().get(0).getScopes().size());
             Assertions.assertEquals("entity:read", path.getMethods().get(0).getScopes().get(0));
+            Assertions.assertEquals("Entity Getter", path.getName());
         });
     }
 
     @Test
-    void givenAnnotatedController_resourcesAreCreated() throws Exception {
+    void givenAnnotatedController_resourcesAreCreated() {
         Map<String, Object> beansWithAnnotation = new HashMap<>();
         beansWithAnnotation.put("ControllerWithSingleRequestMapping", new ControllerWithSingleRequestMapping());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
@@ -117,17 +136,16 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertNotNull(paths);
         Assertions.assertFalse(paths.isEmpty());
         Assertions.assertEquals(5, paths.size());
-        paths.forEach(path -> {
-            Assertions.assertEquals("/myAwesomeMapping", path.getPath());
-        });
+        paths.forEach(path -> Assertions.assertEquals("/myAwesomeMapping", path.getPath()));
     }
 
     @Test
-    void givenControllerWithMultiplePaths_resourcesAreCreated() throws Exception {
+    void givenControllerWithMultiplePaths_resourcesAreCreated() {
         Map<String, Object> beansWithAnnotation = new HashMap<>();
         beansWithAnnotation.put("ControllerWithMultiplePathsInRequestMapping", new ControllerWithMultiplePathsInRequestMapping());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
@@ -142,11 +160,12 @@ class KeycloakResourceAutoConfigurationTest {
     }
 
     @Test
-    void givenAMethodWthMultiplePaths_withoutRequestMapping_resourcesAreCreated() throws Exception {
+    void givenAMethodWthMultiplePaths_withoutRequestMapping_resourcesAreCreated() {
         Map<String, Object> beansWithAnnotation = new HashMap<>();
         beansWithAnnotation.put("ControllerWithMultiplePathOnMethod", new ControllerWithMultiplePathOnMethod());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
@@ -160,11 +179,12 @@ class KeycloakResourceAutoConfigurationTest {
     }
 
     @Test
-    void givenAnnotatedController_withoutRequestMapping_resourcesAreCreated() throws Exception {
+    void givenAnnotatedController_withoutRequestMapping_resourcesAreCreated() {
         Map<String, Object> beansWithAnnotation = new HashMap<>();
         beansWithAnnotation.put("ControllerWithoutRequestMapping", new ControllerWithoutRequestMapping());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
@@ -173,12 +193,7 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertNotNull(paths);
         Assertions.assertFalse(paths.isEmpty());
         Assertions.assertEquals(5, paths.size());
-        paths.forEach(path -> {
-            Assertions.assertEquals("/", path.getPath());
-        });
+        paths.forEach(path -> Assertions.assertEquals("/", path.getPath()));
     }
-
-
-
 
 }

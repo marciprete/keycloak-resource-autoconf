@@ -33,6 +33,7 @@ public class ControllerV2WithAuthzScopes {
     @GetMapping
     @ApiOperation(
             value = "GET",
+            nickname = "Entity Reader",
             authorizations = {
                     @Authorization(
                             value = "get",

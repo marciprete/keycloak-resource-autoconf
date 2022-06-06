@@ -28,4 +28,15 @@ public class SwaggerV2OperationService implements SwaggerOperationService {
         }
     }
 
+    @Override
+    public String getName(Method method) {
+        final ApiOperation apiOperationAnnotation = AnnotationUtils.getAnnotation(method, ApiOperation.class);
+        String name = method.getName();
+        if (apiOperationAnnotation != null &&
+                apiOperationAnnotation.nickname() != null &&
+                !apiOperationAnnotation.nickname().isEmpty()) {
+            name = apiOperationAnnotation.nickname();
+        }
+        return name;
+    }
 }

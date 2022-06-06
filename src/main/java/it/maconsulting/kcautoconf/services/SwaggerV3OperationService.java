@@ -25,4 +25,15 @@ public class SwaggerV3OperationService implements SwaggerOperationService {
         }
     }
 
+    @Override
+    public String getName(Method method) {
+        final Operation apiOperationAnnotation = AnnotationUtils.getAnnotation(method, Operation.class);
+        String name = method.getName();
+        if (apiOperationAnnotation != null &&
+                apiOperationAnnotation.operationId() != null &&
+                !apiOperationAnnotation.operationId().isEmpty()) {
+            name = apiOperationAnnotation.operationId();
+        }
+        return name;
+    }
 }

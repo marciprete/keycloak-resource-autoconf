@@ -1,0 +1,47 @@
+{
+  "allowRemoteResourceManagement": true,
+  "policyEnforcementMode": "ENFORCING",
+  "resources": [
+    {
+      "name": "Authorized Resource",
+      "ownerManagedAccess": false,
+      "displayName": "Authorized Resource",
+      "attributes": {},
+      "uris": [],
+      "scopes": [
+        {
+          "name": "resource:view"
+        }
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "name": "Authz User Policy",
+      "type": "role",
+      "logic": "POSITIVE",
+      "decisionStrategy": "UNANIMOUS",
+      "config": {
+        "roles": "[{\"id\":\"authorized-user\",\"required\":true}]"
+      }
+    },
+    {
+      "id": "e6c9c1e6-29e1-4fa0-af1a-66285a0763eb",
+      "name": "Authorized Scope Permission",
+      "type": "scope",
+      "logic": "POSITIVE",
+      "decisionStrategy": "AFFIRMATIVE",
+      "config": {
+        "scopes": "[\"resource:view\"]",
+        "applyPolicies": "[\"Authz User Policy\"]"
+      }
+    }
+  ],
+  "scopes": [
+    {
+      "id": "afff8c89-d239-4ddb-8358-08b75dcf2831",
+      "name": "resource:view"
+    }
+  ],
+  "decisionStrategy": "AFFIRMATIVE"
+}
