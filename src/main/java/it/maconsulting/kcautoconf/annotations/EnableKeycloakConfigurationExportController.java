@@ -16,6 +16,7 @@
 package it.maconsulting.kcautoconf.annotations;
 
 import it.maconsulting.kcautoconf.KeycloakResourceAutoConfiguration;
+import it.maconsulting.kcautoconf.controller.ConfigurationExportController;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
@@ -31,6 +32,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import({KeycloakResourceAutoConfiguration.class})
-public @interface EnableKeycloakResourcesAutoconfig {
+@Import({ConfigurationExportController.class})
+public @interface EnableKeycloakConfigurationExportController {
 }
