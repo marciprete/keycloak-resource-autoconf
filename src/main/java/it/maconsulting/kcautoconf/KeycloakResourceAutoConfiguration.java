@@ -21,6 +21,7 @@ import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -52,15 +53,20 @@ import java.util.stream.Collectors;
 public class KeycloakResourceAutoConfiguration {
     private final static Logger log = LoggerFactory.getLogger(KeycloakResourceAutoConfiguration.class);
 
-    @Autowired
-    private ApplicationContext context;
+    private final ApplicationContext context;
+
+    private final List<SwaggerOperationService> swaggerOperationServices;
 
     @Autowired
-    private List<SwaggerOperationService> swaggerOperationServices;
+    public KeycloakResourceAutoConfiguration(ApplicationContext context, ListableBeanFactory beanFactory) {
+        this.context = context;
+        swaggerOperationServices = new ArrayList<>(beanFactory.getBeansOfType(SwaggerOperationService.class).values());
+    }
 
     @Bean
     @Primary
     public KeycloakSpringBootProperties kcProperties() {
+        log.debug("Version 0.2.2-SNAPSHOT Initialized");
         log.info("Automatic resources and scopes configuration process started.");
         KeycloakSpringBootProperties keycloakSpringBootProperties = new KeycloakSpringBootProperties();
         PolicyEnforcerConfig policyEnforcerConfig = new PolicyEnforcerConfig();
