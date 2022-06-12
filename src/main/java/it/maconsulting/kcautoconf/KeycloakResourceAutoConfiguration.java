@@ -23,12 +23,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Method;
@@ -66,7 +68,6 @@ public class KeycloakResourceAutoConfiguration {
     @Bean
     @Primary
     public KeycloakSpringBootProperties kcProperties() {
-        log.debug("Version 0.2.2-SNAPSHOT Initialized");
         log.info("Automatic resources and scopes configuration process started.");
         KeycloakSpringBootProperties keycloakSpringBootProperties = new KeycloakSpringBootProperties();
         PolicyEnforcerConfig policyEnforcerConfig = new PolicyEnforcerConfig();
