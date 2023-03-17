@@ -1,34 +1,50 @@
 package it.maconsulting.kcautoconf.services;
 
-import it.maconsulting.kcautoconf.services.KeycloakConfigurationGeneratorService;
+import it.maconsulting.kcautoconf.pojo.AuthorizedResourceDTO;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class JsonKeycloakConfigurationGenerator implements KeycloakConfigurationGeneratorService {
 
-    //    @Autowired
+    private static final Logger log = LoggerFactory.getLogger("JsonKeycloakConfigurationGenerator");
+
 //    @Qualifier("internalKcProperties")
     private final KeycloakSpringBootProperties kcProperties;
+    private final ApplicationContext applicationContext;
 
     @Autowired
-    public JsonKeycloakConfigurationGenerator(KeycloakSpringBootProperties kcProperties) {
+    public JsonKeycloakConfigurationGenerator(KeycloakSpringBootProperties kcProperties, ApplicationContext applicationContext) {
         this.kcProperties = kcProperties;
+        this.applicationContext = applicationContext;
     }
 
     @Override
     public String generateConfigurationAsJson() {
         List<PolicyEnforcerConfig.PathConfig> paths = kcProperties.getPolicyEnforcerConfig().getPaths();
+        List<AuthorizedResourceDTO> resourceDTOS = new ArrayList<>();
         paths.forEach(pathConfig -> {
-            System.out.println(pathConfig);
-            pathConfig.getScopes().forEach(System.out::println);
+            if(!PolicyEnforcerConfig.EnforcementMode.DISABLED.equals(pathConfig.getEnforcementMode())) {
+                AuthorizedResourceDTO resourceDTO = new AuthorizedResourceDTO();
+
+                System.out.println(pathConfig);
+                log.info("Path Config: {}", pathConfig);
+                pathConfig.getScopes().forEach(System.out::println);
+
+            }
+
 
         });
+
+        System.out.println(resourceDTOS);
 
 
 //        Reflections reflections = new Reflections(Exporter.class,

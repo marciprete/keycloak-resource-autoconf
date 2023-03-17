@@ -16,16 +16,21 @@
 package it.maconsulting.kcautoconf;
 
 import it.maconsulting.kcautoconf.fixtures.*;
+import it.maconsulting.kcautoconf.services.AutoconfigurationService;
 import it.maconsulting.kcautoconf.services.SwaggerOperationService;
 import it.maconsulting.kcautoconf.services.SwaggerV2OperationService;
 import it.maconsulting.kcautoconf.services.SwaggerV3OperationService;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
@@ -52,8 +57,24 @@ class KeycloakResourceAutoConfigurationTest {
     @Spy
     private SwaggerV3OperationService swaggerV3OperationService;
 
-    @InjectMocks
+//    private AutoconfigurationService autoconfigurationService;
+
+
     private KeycloakResourceAutoConfiguration sut;
+
+
+    @BeforeEach
+    public void setup() {
+        KeycloakSpringBootProperties keycloakSpringBootProperties = new KeycloakSpringBootProperties();
+        PolicyEnforcerConfig policyEnforcerConfig = new PolicyEnforcerConfig();
+        keycloakSpringBootProperties.setPolicyEnforcerConfig(policyEnforcerConfig);
+        Mockito.when(context.getBean(KeycloakSpringBootProperties.class)).thenReturn(keycloakSpringBootProperties);
+
+//        autoconfigurationService = new AutoconfigurationService(context, keycloakSpringBootProperties, swaggerOperationServices);
+//        sut = new KeycloakResourceAutoConfiguration(autoconfigurationService);
+        sut = new KeycloakResourceAutoConfiguration(context, swaggerOperationServices);
+
+    }
 
     @Test
     void givenV2ControllerWithAuthzScopes_resourcesAreCreated() {
@@ -97,7 +118,6 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertEquals(1, paths.size());
         paths.forEach(path -> {
             Assertions.assertEquals("/authorized", path.getPath());
-
             Assertions.assertEquals(1, path.getMethods().get(0).getScopes().size());
             Assertions.assertEquals("entity:read", path.getMethods().get(0).getScopes().get(0));
         });

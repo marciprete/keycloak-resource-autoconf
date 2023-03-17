@@ -5,7 +5,7 @@
 
     <groupId>it.maconsultingitalia.keycloak</groupId>
     <artifactId>keycloak-resource-autoconf</artifactId>
-    <version>0.2.2-SNAPSHOT</version>
+    <version>0.2.3-SNAPSHOT</version>
 
     <name>Keycloak Resource Autoconfigurator</name>
     <description>Automatic configuration annotation to enable autodiscovery of Keycloak policy enforcement
@@ -116,7 +116,14 @@
             <groupId>org.thymeleaf</groupId>
             <artifactId>thymeleaf-spring5</artifactId>
             <version>3.0.11.RELEASE</version>
-            <scope>compile</scope>
+<!--            <scope>runtime</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.26</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>

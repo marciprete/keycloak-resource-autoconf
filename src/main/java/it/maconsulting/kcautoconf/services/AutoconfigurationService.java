@@ -1,33 +1,20 @@
-/*
- * Copyright 2020-2021 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package it.maconsulting.kcautoconf;
+package it.maconsulting.kcautoconf.services;
 
-import it.maconsulting.kcautoconf.services.SwaggerOperationService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -37,39 +24,37 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-/**
- * This is the implementation of the autoconfig annotation.
- * It integrates the {@link org.keycloak.adapters.springboot.KeycloakSpringBootProperties} and performs the automatic
- * resources and scopes configuration.<br>
- * The process is additive and not destructive. It means that if a policy-enforcement configuration section is present
- * in the application.properties or application.yaml file, it is kept.
- *
- * @author Michele Arciprete
- * @since 1.0-SNAPSHOT
- */
-@Configuration
-@ComponentScan(basePackages = {"it.maconsulting.kcautoconf.*"})
-public class KeycloakResourceAutoConfiguration {
-    private final static Logger log = LoggerFactory.getLogger(KeycloakResourceAutoConfiguration.class);
+
+@Slf4j
+@Service
+public class AutoconfigurationService {
 
     private final ApplicationContext context;
-
+    private final KeycloakSpringBootProperties keycloakSpringBootProperties;
     private final List<SwaggerOperationService> swaggerOperationServices;
 
     @Autowired
-    public KeycloakResourceAutoConfiguration(ApplicationContext context, List<SwaggerOperationService> swaggerOperationServices) {
+    public AutoconfigurationService(ApplicationContext context, KeycloakSpringBootProperties keycloakSpringBootProperties, List<SwaggerOperationService> swaggerOperationServices) {
         this.context = context;
+        this.keycloakSpringBootProperties = keycloakSpringBootProperties;
         this.swaggerOperationServices = swaggerOperationServices;
     }
 
-    public KeycloakSpringBootProperties kcProperties() {
+    public void updateKeycloakConfiguration() {
         log.info("Automatic resources and scopes configuration process started.");
-        KeycloakSpringBootProperties keycloakSpringBootProperties = new KeycloakSpringBootProperties();
-        PolicyEnforcerConfig policyEnforcerConfig = new PolicyEnforcerConfig();
+//        KeycloakSpringBootProperties keycloakSpringBootProperties = context.getBean(KeycloakSpringBootProperties.class);
+        keycloakSpringBootProperties.getPolicyEnforcerConfig().getPaths().addAll(getPathConfigurations());
+//        return keycloakSpringBootProperties;
+    }
 
-        keycloakSpringBootProperties.setPolicyEnforcerConfig(policyEnforcerConfig);
+    public KeycloakSpringBootProperties getKeycloakSpringBootProperties() {
+        return keycloakSpringBootProperties;
+    }
 
+    private List<PolicyEnforcerConfig.PathConfig> getPathConfigurations() {
+        List<PolicyEnforcerConfig.PathConfig> pathConfigList = new ArrayList<>();
         Map<String, Object> beansWithAnnotation = context.getBeansWithAnnotation(RestController.class);
+
         beansWithAnnotation.forEach((name, bean) -> {
             final Class<?> targetClass = AopUtils.getTargetClass(bean);
             final RequestMapping requestMappingAnnotation = AnnotationUtils.getAnnotation(targetClass, RequestMapping.class);
@@ -102,14 +87,16 @@ public class KeycloakResourceAutoConfiguration {
                                     methodConfig.setScopes(scopes);
                                 }
                                 pathConfig.getMethods().add(methodConfig);
-                                keycloakSpringBootProperties.getPolicyEnforcerConfig().getPaths().add(pathConfig);
+
+                                pathConfigList.add(pathConfig);
+
                             });
                         });
                     });
                 }
             });
         });
-        return keycloakSpringBootProperties;
+        return pathConfigList;
     }
 
     private List<String> getClassLevelAnnotatedPaths(RequestMapping requestMappingAnnotation) {
@@ -147,6 +134,4 @@ public class KeycloakResourceAutoConfiguration {
     private String addLeadingSlash(String path) {
         return !path.startsWith("/") ? "/" + path : path;
     }
-
 }
-

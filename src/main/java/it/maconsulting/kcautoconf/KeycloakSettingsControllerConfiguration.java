@@ -59,9 +59,9 @@ public class KeycloakSettingsControllerConfiguration {
         return new ConfigurationExportController(service);
     }
 
-    @Bean
-    @Order(50)
-    public KeycloakConfigurationGeneratorService keycloakConfigurationGeneratorService(KeycloakSpringBootProperties kcProperties) {
-        return new JsonKeycloakConfigurationGenerator(kcProperties);
-    }
+//    @Bean
+//    @Order(50)
+//    public KeycloakConfigurationGeneratorService keycloakConfigurationGeneratorService(KeycloakSpringBootProperties kcProperties) {
+//        return new JsonKeycloakConfigurationGenerator(kcProperties);
+//    }
 }
