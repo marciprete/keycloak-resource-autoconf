@@ -1,10 +1,11 @@
 package it.maconsulting.kcautoconf.services;
 
+import it.maconsulting.kcautoconf.pojo.AuthorizationScopeDTO;
+import it.maconsulting.kcautoconf.pojo.AuthorizationSettingsDTO;
 import it.maconsulting.kcautoconf.pojo.AuthorizedResourceDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -12,12 +13,10 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 public class JsonKeycloakConfigurationGenerator implements KeycloakConfigurationGeneratorService {
 
-    private static final Logger log = LoggerFactory.getLogger("JsonKeycloakConfigurationGenerator");
-
-//    @Qualifier("internalKcProperties")
     private final KeycloakSpringBootProperties kcProperties;
     private final ApplicationContext applicationContext;
 
@@ -28,24 +27,35 @@ public class JsonKeycloakConfigurationGenerator implements KeycloakConfiguration
     }
 
     @Override
-    public String generateConfigurationAsJson() {
+    public AuthorizationSettingsDTO generateConfigurationAsJson() {
+        AuthorizationSettingsDTO settings = new AuthorizationSettingsDTO();
+        //DEFAULTS
+        settings.setDecisionStrategy("AFFIRMATIVE");
+        settings.setPolicyEnforcementMode("ENFORCING");
+
         List<PolicyEnforcerConfig.PathConfig> paths = kcProperties.getPolicyEnforcerConfig().getPaths();
         List<AuthorizedResourceDTO> resourceDTOS = new ArrayList<>();
         paths.forEach(pathConfig -> {
-            if(!PolicyEnforcerConfig.EnforcementMode.DISABLED.equals(pathConfig.getEnforcementMode())) {
+            if(!PolicyEnforcerConfig.EnforcementMode.DISABLED.equals(pathConfig.getEnforcementMode()) &&
+                    !pathConfig.getScopes().isEmpty()) {
                 AuthorizedResourceDTO resourceDTO = new AuthorizedResourceDTO();
+                resourceDTO.setName(pathConfig.getName());
+                resourceDTO.getUris().add(pathConfig.getPath());
+                resourceDTO.getAuthorizationScopes().addAll(pathConfig.getScopes());
+                resourceDTOS.add(resourceDTO);
 
-                System.out.println(pathConfig);
-                log.info("Path Config: {}", pathConfig);
-                pathConfig.getScopes().forEach(System.out::println);
+                pathConfig.getScopes().forEach(scope -> {
+                    AuthorizationScopeDTO scopeDTO = new AuthorizationScopeDTO();
+                    scopeDTO.setName(scope);
+                    settings.getScopes().add(scopeDTO);
+                });
+
 
             }
-
-
         });
 
-        System.out.println(resourceDTOS);
-
+        settings.setResources(resourceDTOS);
+        return settings;
 
 //        Reflections reflections = new Reflections(Exporter.class,
 //                Scanners.MethodsAnnotated);
@@ -100,6 +110,5 @@ public class JsonKeycloakConfigurationGenerator implements KeycloakConfiguration
 //        } catch (JsonProcessingException e) {
 //            e.printStackTrace();
 //        }
-        return "GIAO";
     }
 }

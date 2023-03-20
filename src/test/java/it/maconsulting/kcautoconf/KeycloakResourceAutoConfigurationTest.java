@@ -21,16 +21,14 @@ import it.maconsulting.kcautoconf.services.SwaggerOperationService;
 import it.maconsulting.kcautoconf.services.SwaggerV2OperationService;
 import it.maconsulting.kcautoconf.services.SwaggerV3OperationService;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
-import org.mockito.*;
+import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
@@ -57,8 +55,7 @@ class KeycloakResourceAutoConfigurationTest {
     @Spy
     private SwaggerV3OperationService swaggerV3OperationService;
 
-//    private AutoconfigurationService autoconfigurationService;
-
+    private AutoconfigurationService autoconfigurationService;
 
     private KeycloakResourceAutoConfiguration sut;
 
@@ -68,12 +65,9 @@ class KeycloakResourceAutoConfigurationTest {
         KeycloakSpringBootProperties keycloakSpringBootProperties = new KeycloakSpringBootProperties();
         PolicyEnforcerConfig policyEnforcerConfig = new PolicyEnforcerConfig();
         keycloakSpringBootProperties.setPolicyEnforcerConfig(policyEnforcerConfig);
-        Mockito.when(context.getBean(KeycloakSpringBootProperties.class)).thenReturn(keycloakSpringBootProperties);
 
-//        autoconfigurationService = new AutoconfigurationService(context, keycloakSpringBootProperties, swaggerOperationServices);
-//        sut = new KeycloakResourceAutoConfiguration(autoconfigurationService);
-        sut = new KeycloakResourceAutoConfiguration(context, swaggerOperationServices);
-
+        autoconfigurationService = new AutoconfigurationService(context, keycloakSpringBootProperties, swaggerOperationServices);
+        sut = new KeycloakResourceAutoConfiguration(autoconfigurationService);
     }
 
     @Test
@@ -84,6 +78,7 @@ class KeycloakResourceAutoConfigurationTest {
         beansWithAnnotation.put("ControllerWithAuthzScopes", new ControllerV2WithAuthzScopes());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
@@ -109,6 +104,8 @@ class KeycloakResourceAutoConfigurationTest {
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
 
+        autoconfigurationService.updateKeycloakConfiguration();
+
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
         Assertions.assertNotNull(properties.getPolicyEnforcerConfig());
@@ -129,6 +126,7 @@ class KeycloakResourceAutoConfigurationTest {
         beansWithAnnotation.put("ControllerWithSingleRequestMapping", new ControllerWithSingleRequestMapping());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
@@ -148,6 +146,7 @@ class KeycloakResourceAutoConfigurationTest {
         beansWithAnnotation.put("ControllerWithMultiplePathsInRequestMapping", new ControllerWithMultiplePathsInRequestMapping());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
@@ -167,6 +166,7 @@ class KeycloakResourceAutoConfigurationTest {
         beansWithAnnotation.put("ControllerWithMultiplePathOnMethod", new ControllerWithMultiplePathOnMethod());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);
@@ -185,6 +185,7 @@ class KeycloakResourceAutoConfigurationTest {
         beansWithAnnotation.put("ControllerWithoutRequestMapping", new ControllerWithoutRequestMapping());
 
         Mockito.when(context.getBeansWithAnnotation(Mockito.any())).thenReturn(beansWithAnnotation);
+        autoconfigurationService.updateKeycloakConfiguration();
 
         KeycloakSpringBootProperties properties = sut.kcProperties();
         Assertions.assertNotNull(properties);

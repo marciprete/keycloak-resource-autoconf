@@ -1,25 +1,22 @@
 package it.maconsulting.kcautoconf;
 
 import it.maconsulting.kcautoconf.controller.ConfigurationExportController;
-import it.maconsulting.kcautoconf.services.JsonKeycloakConfigurationGenerator;
+import it.maconsulting.kcautoconf.services.AutoconfigurationService;
 import it.maconsulting.kcautoconf.services.KeycloakConfigurationGeneratorService;
-import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Description;
-import org.springframework.core.annotation.Order;
 import org.thymeleaf.spring5.SpringTemplateEngine;
 import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 
 @Configuration
 public class KeycloakSettingsControllerConfiguration {
-    private final ApplicationContext applicationContext;
+    private final AutoconfigurationService autoconfigurationService;
 
-    public KeycloakSettingsControllerConfiguration(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
+    public KeycloakSettingsControllerConfiguration(AutoconfigurationService autoconfigurationService) {
+        this.autoconfigurationService = autoconfigurationService;
+        autoconfigurationService.enableConfigurationPage();
     }
 
     @Bean
@@ -28,7 +25,7 @@ public class KeycloakSettingsControllerConfiguration {
         // SpringResourceTemplateResolver automatically integrates with Spring's own
         // resource resolution infrastructure, which is highly recommended.
         SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
-        templateResolver.setApplicationContext(this.applicationContext);
+        templateResolver.setApplicationContext(autoconfigurationService.getContext());
         templateResolver.setPrefix("classpath:/WEB-INF/views/");
         templateResolver.setSuffix(".html");
         // HTML is the default value, added here for the sake of clarity.

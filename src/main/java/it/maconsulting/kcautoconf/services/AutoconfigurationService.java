@@ -1,16 +1,13 @@
 package it.maconsulting.kcautoconf.services;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -47,11 +44,20 @@ public class AutoconfigurationService {
 //        return keycloakSpringBootProperties;
     }
 
+    public ApplicationContext getContext() {
+        return context;
+    }
+
+    public List<SwaggerOperationService> getSwaggerOperationServices() {
+        return swaggerOperationServices;
+    }
+
     public KeycloakSpringBootProperties getKeycloakSpringBootProperties() {
         return keycloakSpringBootProperties;
     }
 
     private List<PolicyEnforcerConfig.PathConfig> getPathConfigurations() {
+        log.info("Automatic resources and scopes configuration process started.");
         List<PolicyEnforcerConfig.PathConfig> pathConfigList = new ArrayList<>();
         Map<String, Object> beansWithAnnotation = context.getBeansWithAnnotation(RestController.class);
 
@@ -133,5 +139,13 @@ public class AutoconfigurationService {
 
     private String addLeadingSlash(String path) {
         return !path.startsWith("/") ? "/" + path : path;
+    }
+
+    public void enableConfigurationPage() {
+        PolicyEnforcerConfig.PathConfig configurationPath = new PolicyEnforcerConfig.PathConfig();
+        configurationPath.setPath("/mac/configuration/export");
+        configurationPath.setEnforcementMode(PolicyEnforcerConfig.EnforcementMode.DISABLED);
+        getKeycloakSpringBootProperties().getPolicyEnforcerConfig().getPaths().add(configurationPath);
+
     }
 }
