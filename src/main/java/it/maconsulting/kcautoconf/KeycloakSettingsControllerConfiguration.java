@@ -1,8 +1,7 @@
 package it.maconsulting.kcautoconf;
 
-import it.maconsulting.kcautoconf.controller.ConfigurationExportController;
 import it.maconsulting.kcautoconf.services.AutoconfigurationService;
-import it.maconsulting.kcautoconf.services.KeycloakConfigurationGeneratorService;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Description;
@@ -11,6 +10,7 @@ import org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 
 @Configuration
+@ConfigurationProperties(prefix = "kcautoconf")
 public class KeycloakSettingsControllerConfiguration {
     private final AutoconfigurationService autoconfigurationService;
 
@@ -51,14 +51,4 @@ public class KeycloakSettingsControllerConfiguration {
         return templateEngine;
     }
 
-    @Bean
-    public ConfigurationExportController configurationExportController(KeycloakConfigurationGeneratorService service) {
-        return new ConfigurationExportController(service);
-    }
-
-//    @Bean
-//    @Order(50)
-//    public KeycloakConfigurationGeneratorService keycloakConfigurationGeneratorService(KeycloakSpringBootProperties kcProperties) {
-//        return new JsonKeycloakConfigurationGenerator(kcProperties);
-//    }
 }

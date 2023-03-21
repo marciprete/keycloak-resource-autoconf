@@ -10,8 +10,8 @@ public class AuthorizedResourceDTO {
 
     private String name;
     private String displayName;
-    private boolean ownedManagedAccess;
-    private Set<String> authorizationScopes = new HashSet<>();
+    private boolean ownerManagedAccess;
+    private Set<AuthorizationScopeDTO> scopes = new HashSet<>();
     private Set<String> uris = new HashSet<>();
 
 }

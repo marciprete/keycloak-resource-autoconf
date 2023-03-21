@@ -36,11 +36,16 @@ Just add it as maven dependency:
 <dependency>
   <groupId>it.maconsultingitalia.keycloak</groupId>
   <artifactId>keycloak-resource-autoconf</artifactId>
-  <version>0.2.1</version>
+  <version>0.3.0</version>
 </dependency>
 ```
 
-## How it works
+## Features
+From Version 0.3.0 this library adds 2 different features: 
+* Runtime Configuration
+* Keycloak Settings Generator
+
+### Automatic Configuration
 Any controller annotated with `@RestController` is scanned from the autoconfigurator, then all its methods are parsed too,
 searching for any `@RequestMapping` alias.
 The found endpoints are added to the `KeycloakSpringBootProperties`, in the policyEnforcementConfigurations.
@@ -84,6 +89,7 @@ public Class AuthzController {
     @GetMapping
     @Operation(
             summary = "Read my awesome entity",
+            operationId = "Entity Getter",
             security = {
                     @SecurityRequirement(
                             name = "get",
@@ -114,7 +120,7 @@ public Class AuthzController {
 
     @GetMapping
     @ApiOperation(
-            nickname = "getEntity",
+            nickname = "Entity Reader",
             value = "Read my awesome entity",
             authorizations = {
                     @Authorization(
@@ -139,7 +145,61 @@ keycloak:
                 - entity:read
 ```
 
+## Keycloak Settings Generator
+
+The `@EnableKeycloakConfigurationExportController` annotation enables an endpoint with a simple Thymeleaf page
+that prints on screen the Json Settings.
+The service behind this controller uses the keycloak configuration to generate the script that can be imported in 
+Keycloak, whose structure is the following:
+```
+{
+  "allowRemoteResourceManagement": false,
+  "policyEnforcementMode": "ENFORCING",
+  "decisionStrategy": "AFFIRMATIVE",
+  "policies": [],
+  "resources": [
+    {
+      "name": "ResourceName",
+      "ownerManagedAccess": false,
+      "displayName": "ResourceName",
+      "uris": [
+        "/path/as/defined/in/controller"
+      ],
+      "scopes": [
+        {
+          "name": "resource:operation"
+        }
+      ]
+    }
+  ],
+  "scopes": [
+    {
+      "name": "resource:operation"
+    }
+  ]
+}
+```
+At the moment, the export functions creates a file where the global decision strategy is always `AFFIRMATIVE`,
+ and no policies are defined.
+
+All the resources and the Authorization Scopes can be imported from the Keycloak's console.
+
+* _ResourceName_ and _DisplayName_ are the same, as defined in the Api (#ApiOperation.nickname or #Operation.operationId).
+  If the field is not present, the method name will be used in place.
+* OwnerManagedAccess is false by default.
+
+**NOTE**: Existing resources are not added to the export file. That is, if a resource uri is present in the keycloak client, 
+it will be skipped
+
+### Configuration export controller 
+By default, the controller is available under `/mac/configuration/export` but it can be changed via `application.properties`:
+```
+kcautoconf.export-path=/my/custom/export/path
+```
+This endpoint will be available to all the authenticated user. For security reasons, it's strongly recommended to disable
+the Json Configuration export in production. 
+
 ## Known limitations
-At the moment, the endpoints are added only if the methods are mapped with @GetMapping, @PostMapping, @PutMapping etc.
-If the method is annotated via @RequestMapping, then the http verb is not inferred thus the endpoint is not added. 
+At the moment, the endpoints are added only if the methods are mapped with `@GetMapping`, `@PostMapping`, `@PutMapping` etc.
+If the method is annotated via `@RequestMapping`, then the http verb is not inferred thus the endpoint is not added. 
    

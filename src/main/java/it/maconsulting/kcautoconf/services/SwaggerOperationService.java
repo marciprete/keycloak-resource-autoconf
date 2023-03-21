@@ -12,4 +12,6 @@ public interface SwaggerOperationService {
      */
     List<String> getScopes(Method method);
 
+    String getName(Method method);
+
 }

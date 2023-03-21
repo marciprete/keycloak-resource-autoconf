@@ -199,7 +199,4 @@ class KeycloakResourceAutoConfigurationTest {
         });
     }
 
-
-
-
 }

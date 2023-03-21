@@ -32,6 +32,7 @@ public class ControllerV3WithAuthzScopes {
     @GetMapping
     @Operation(
             summary = "GET",
+            operationId = "Entity Getter",
             security = {
                     @SecurityRequirement(
                             name = "get",

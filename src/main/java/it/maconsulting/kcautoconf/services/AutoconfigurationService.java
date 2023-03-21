@@ -5,6 +5,7 @@ import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -14,12 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -30,6 +27,9 @@ public class AutoconfigurationService {
     private final KeycloakSpringBootProperties keycloakSpringBootProperties;
     private final List<SwaggerOperationService> swaggerOperationServices;
 
+    @Value("${kcautoconf.export-path:/mac/configuration/export}")
+    private String exportPath;
+
     @Autowired
     public AutoconfigurationService(ApplicationContext context, KeycloakSpringBootProperties keycloakSpringBootProperties, List<SwaggerOperationService> swaggerOperationServices) {
         this.context = context;
@@ -39,9 +39,7 @@ public class AutoconfigurationService {
 
     public void updateKeycloakConfiguration() {
         log.info("Automatic resources and scopes configuration process started.");
-//        KeycloakSpringBootProperties keycloakSpringBootProperties = context.getBean(KeycloakSpringBootProperties.class);
         keycloakSpringBootProperties.getPolicyEnforcerConfig().getPaths().addAll(getPathConfigurations());
-//        return keycloakSpringBootProperties;
     }
 
     public ApplicationContext getContext() {
@@ -84,18 +82,19 @@ public class AutoconfigurationService {
                                 pathConfig.setPath(policyEnforcementPath);
                                 PolicyEnforcerConfig.MethodConfig methodConfig = new PolicyEnforcerConfig.MethodConfig();
                                 methodConfig.setMethod(verb.name());
-                                List<String> scopes = swaggerOperationServices.stream()
-                                        .flatMap(service -> service.getScopes(method).stream())
-                                        .collect(Collectors.toList());
-                                if (!scopes.isEmpty()) {
-                                    scopes.stream().filter(Predicate.not(String::isBlank))
-                                            .forEach(scope -> log.debug("Found authorization scope: {}", scope));
-                                    methodConfig.setScopes(scopes);
+                                Optional<SwaggerOperationService> operationServiceOption = swaggerOperationServices.stream().findFirst();
+                                if(operationServiceOption.isPresent()) {
+                                    SwaggerOperationService swaggerOperationService = operationServiceOption.get();
+                                    List<String> scopes = swaggerOperationService.getScopes(method);
+                                    if (!scopes.isEmpty()) {
+                                        scopes.stream().filter(Predicate.not(String::isBlank))
+                                                .forEach(scope -> log.debug("Found authorization scope: {}", scope));
+                                        methodConfig.setScopes(scopes);
+                                    }
+                                    pathConfig.getMethods().add(methodConfig);
+                                    pathConfig.setName(swaggerOperationService.getName(method));
                                 }
-                                pathConfig.getMethods().add(methodConfig);
-
                                 pathConfigList.add(pathConfig);
-
                             });
                         });
                     });
@@ -143,7 +142,7 @@ public class AutoconfigurationService {
 
     public void enableConfigurationPage() {
         PolicyEnforcerConfig.PathConfig configurationPath = new PolicyEnforcerConfig.PathConfig();
-        configurationPath.setPath("/mac/configuration/export");
+        configurationPath.setPath(exportPath);
         configurationPath.setEnforcementMode(PolicyEnforcerConfig.EnforcementMode.DISABLED);
         getKeycloakSpringBootProperties().getPolicyEnforcerConfig().getPaths().add(configurationPath);
 
