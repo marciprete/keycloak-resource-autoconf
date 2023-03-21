@@ -89,9 +89,9 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertEquals(1, paths.size());
         paths.forEach(path -> {
             Assertions.assertEquals("/authorized", path.getPath());
-
             Assertions.assertEquals(1, path.getMethods().get(0).getScopes().size());
             Assertions.assertEquals("entity:read", path.getMethods().get(0).getScopes().get(0));
+            Assertions.assertEquals("Entity Reader", path.getName());
         });
     }
 
@@ -117,11 +117,12 @@ class KeycloakResourceAutoConfigurationTest {
             Assertions.assertEquals("/authorized", path.getPath());
             Assertions.assertEquals(1, path.getMethods().get(0).getScopes().size());
             Assertions.assertEquals("entity:read", path.getMethods().get(0).getScopes().get(0));
+            Assertions.assertEquals("Entity Getter", path.getName());
         });
     }
 
     @Test
-    void givenAnnotatedController_resourcesAreCreated() throws Exception {
+    void givenAnnotatedController_resourcesAreCreated() {
         Map<String, Object> beansWithAnnotation = new HashMap<>();
         beansWithAnnotation.put("ControllerWithSingleRequestMapping", new ControllerWithSingleRequestMapping());
 
@@ -135,13 +136,11 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertNotNull(paths);
         Assertions.assertFalse(paths.isEmpty());
         Assertions.assertEquals(5, paths.size());
-        paths.forEach(path -> {
-            Assertions.assertEquals("/myAwesomeMapping", path.getPath());
-        });
+        paths.forEach(path -> Assertions.assertEquals("/myAwesomeMapping", path.getPath()));
     }
 
     @Test
-    void givenControllerWithMultiplePaths_resourcesAreCreated() throws Exception {
+    void givenControllerWithMultiplePaths_resourcesAreCreated() {
         Map<String, Object> beansWithAnnotation = new HashMap<>();
         beansWithAnnotation.put("ControllerWithMultiplePathsInRequestMapping", new ControllerWithMultiplePathsInRequestMapping());
 
@@ -161,7 +160,7 @@ class KeycloakResourceAutoConfigurationTest {
     }
 
     @Test
-    void givenAMethodWthMultiplePaths_withoutRequestMapping_resourcesAreCreated() throws Exception {
+    void givenAMethodWthMultiplePaths_withoutRequestMapping_resourcesAreCreated() {
         Map<String, Object> beansWithAnnotation = new HashMap<>();
         beansWithAnnotation.put("ControllerWithMultiplePathOnMethod", new ControllerWithMultiplePathOnMethod());
 
@@ -180,7 +179,7 @@ class KeycloakResourceAutoConfigurationTest {
     }
 
     @Test
-    void givenAnnotatedController_withoutRequestMapping_resourcesAreCreated() throws Exception {
+    void givenAnnotatedController_withoutRequestMapping_resourcesAreCreated() {
         Map<String, Object> beansWithAnnotation = new HashMap<>();
         beansWithAnnotation.put("ControllerWithoutRequestMapping", new ControllerWithoutRequestMapping());
 
@@ -194,9 +193,7 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertNotNull(paths);
         Assertions.assertFalse(paths.isEmpty());
         Assertions.assertEquals(5, paths.size());
-        paths.forEach(path -> {
-            Assertions.assertEquals("/", path.getPath());
-        });
+        paths.forEach(path -> Assertions.assertEquals("/", path.getPath()));
     }
 
 }

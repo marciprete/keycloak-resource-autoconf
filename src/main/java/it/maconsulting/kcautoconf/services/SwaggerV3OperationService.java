@@ -1,6 +1,5 @@
 package it.maconsulting.kcautoconf.services;
 
-import io.swagger.annotations.ApiOperation;
 import io.swagger.v3.oas.annotations.Operation;
 import it.maconsulting.kcautoconf.conditions.SwaggerV3Condition;
 import org.springframework.context.annotation.Conditional;
@@ -28,7 +27,7 @@ public class SwaggerV3OperationService implements SwaggerOperationService {
 
     @Override
     public String getName(Method method) {
-        final Operation apiOperationAnnotation = AnnotationUtils.getAnnotation(method, Operation.class);;
+        final Operation apiOperationAnnotation = AnnotationUtils.getAnnotation(method, Operation.class);
         String name = method.getName();
         if (apiOperationAnnotation != null &&
                 apiOperationAnnotation.operationId() != null &&

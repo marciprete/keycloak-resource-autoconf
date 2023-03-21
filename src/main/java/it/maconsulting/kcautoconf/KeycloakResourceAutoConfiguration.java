@@ -16,16 +16,10 @@
 package it.maconsulting.kcautoconf;
 
 import it.maconsulting.kcautoconf.services.AutoconfigurationService;
-import it.maconsulting.kcautoconf.services.SwaggerOperationService;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
 
 /**
  * This is the implementation of the autoconfig annotation.
@@ -40,19 +34,11 @@ import java.util.List;
 @Configuration
 @ComponentScan(basePackages = {"it.maconsulting.kcautoconf.*"})
 public class KeycloakResourceAutoConfiguration {
-    private final static Logger log = LoggerFactory.getLogger(KeycloakResourceAutoConfiguration.class);
-
-    private final ApplicationContext context;
-
-    private final List<SwaggerOperationService> swaggerOperationServices;
-
     private final AutoconfigurationService autoconfigurationService;
 
     @Autowired
     public KeycloakResourceAutoConfiguration(AutoconfigurationService autoconfigurationService) {
         this.autoconfigurationService = autoconfigurationService;
-        this.context = autoconfigurationService.getContext();
-        this.swaggerOperationServices = autoconfigurationService.getSwaggerOperationServices();
         autoconfigurationService.updateKeycloakConfiguration();
     }
 
