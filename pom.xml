@@ -5,7 +5,7 @@
 
     <groupId>it.maconsultingitalia.keycloak</groupId>
     <artifactId>keycloak-resource-autoconf</artifactId>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.3.0</version>
 
     <name>Keycloak Resource Autoconfigurator</name>
     <description>Automatic configuration annotation to enable autodiscovery of Keycloak policy enforcement
@@ -50,6 +50,8 @@
         <thymeleaf.version>3.1.1.RELEASE</thymeleaf.version>
         <gson.version>2.10.1</gson.version>
         <lombok.version>1.18.26</lombok.version>
+        <jackson-databind.version>2.14.2</jackson-databind.version>
+        <bcprov-jdk15on.version>1.70</bcprov-jdk15on.version>
         <mockito.version>4.2.0</mockito.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
@@ -79,14 +81,14 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.14.2</version>
+            <version>${jackson-databind.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.70</version>
+            <version>${bcprov-jdk15on.version}</version>
         </dependency>
 
         <dependency>
@@ -273,6 +275,7 @@
                     <localCheckout>true</localCheckout>
                     <pushChanges>false</pushChanges>
                     <mavenExecutorId>forked-path</mavenExecutorId>
+                    <!--suppress UnresolvedMavenProperty -->
                     <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
                 </configuration>
                 <dependencies>

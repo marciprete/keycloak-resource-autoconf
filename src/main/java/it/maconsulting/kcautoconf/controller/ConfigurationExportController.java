@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/mac/configuration/export")
+@RequestMapping("${kcautoconf.export-path:/mac/configuration/export}")
 public class ConfigurationExportController {
 
     private final KeycloakConfigurationGeneratorService keycloakConfigurationGeneratorService;
@@ -21,24 +21,9 @@ public class ConfigurationExportController {
         this.keycloakConfigurationGeneratorService = keycloakConfigurationGeneratorService;
     }
 
-    //    @Autowired
-//    public ConfigurationExportController(ApplicationContext applicationContext, KeycloakConfigurationGeneratorService keycloakConfigurationGeneratorService) {
-//        this.applicationContext = applicationContext;
-//
-////        this.keycloakConfigurationGeneratorService = beanFactory.getBean(KeycloakConfigurationGeneratorService.class);
-//        this.keycloakConfigurationGeneratorService = keycloakConfigurationGeneratorService;
-//    }
-
-
-//    @Bean
-//    KeycloakConfigurationGeneratorService keycloakConfigurationGeneratorService(KeycloakSpringBootProperties kcProperties) {
-//        return new JsonKeycloakConfigurationGenerator(kcProperties);
-//    }
-
     @GetMapping
     public String configure(Model model) {
         AuthorizationSettingsDTO paths = keycloakConfigurationGeneratorService.generateConfigurationAsJson();
-
 
         GsonBuilder builder = new GsonBuilder();
         Gson gson = builder.disableHtmlEscaping()
