@@ -5,7 +5,7 @@
 
     <groupId>it.maconsultingitalia.keycloak</groupId>
     <artifactId>keycloak-resource-autoconf</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.1</version>
 
     <name>Keycloak Resource Autoconfigurator</name>
     <description>Automatic configuration annotation to enable autodiscovery of Keycloak policy enforcement
@@ -25,7 +25,7 @@
         <developer>
             <name>Michele Arciprete</name>
             <email>m.arciprete@gmail.com</email>
-            <organization>MAConsulting</organization>
+            <organization>MA Consulting S.r.l.</organization>
             <url>https://www.maconsultingitalia.it</url>
         </developer>
     </developers>

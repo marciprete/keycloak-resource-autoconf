@@ -44,10 +44,12 @@ public class JsonKeycloakConfigurationGenerator implements KeycloakConfiguration
                 resourceDTO.getUris().add(pathConfig.getPath());
                 Set<String> scopes = pathConfig.getMethods().stream().flatMap(methodConfig -> methodConfig.getScopes().stream()).collect(Collectors.toSet());
                 scopes.forEach(scope -> {
-                    AuthorizationScopeDTO scopeDTO = new AuthorizationScopeDTO();
-                    scopeDTO.setName(scope);
-                    settings.getScopes().add(scopeDTO);
-                    resourceDTO.getScopes().add(scopeDTO);
+                    if(!scope.isEmpty()) {
+                        AuthorizationScopeDTO scopeDTO = new AuthorizationScopeDTO();
+                        scopeDTO.setName(scope);
+                        settings.getScopes().add(scopeDTO);
+                        resourceDTO.getScopes().add(scopeDTO);
+                    }
                 });
                 resourceDTOS.add(resourceDTO);
             }

@@ -1,3 +1,6 @@
+![workflow](https://github.com/marciprete/keycloak-resource-autoconf/actions/workflows/maven.yml/badge.svg)
+
+
 # Keycloak Resource Autoconfigurator for Spring Boot 2 
 
 [Keycloak](https://www.keycloak.org) is an Open Source Identity and Access Management solution for modern Applications and Services.
@@ -26,9 +29,9 @@ The aim of this project is to provide an automatic configuration process, based 
 ## Requirements
 To take advantage of the autoconfiguration process, the resource server application must be a based on SpringBoot 2, 
 and make use of the following:
-* Swagger annotations (v1.5 or v2)
-* RestController annotations
-* Keycloak spring-boot adapter
+  * Swagger annotations (v1.5 or v2)
+  * RestController annotations
+  * Keycloak spring-boot adapter
 
 ## Installation
 Just add it as maven dependency:
@@ -41,9 +44,10 @@ Just add it as maven dependency:
 ```
 
 ## Features
-From Version 0.3.0 this library adds 2 different features: 
-* Runtime Configuration
-* Keycloak Settings Generator
+From Version 0.3.0 this library adds 2 different features:
+
+  * Runtime Configuration
+  * Keycloak Settings Generator
 
 ### Automatic Configuration
 Any controller annotated with `@RestController` is scanned from the autoconfigurator, then all its methods are parsed too,
@@ -184,9 +188,9 @@ At the moment, the export functions creates a file where the global decision str
 
 All the resources and the Authorization Scopes can be imported from the Keycloak's console.
 
-* _ResourceName_ and _DisplayName_ are the same, as defined in the Api (#ApiOperation.nickname or #Operation.operationId).
+  * _ResourceName_ and _DisplayName_ are the same, as defined in the Api (#ApiOperation.nickname or #Operation.operationId).
   If the field is not present, the method name will be used in place.
-* OwnerManagedAccess is false by default.
+  * OwnerManagedAccess is false by default.
 
 **NOTE**: Existing resources are not added to the export file. That is, if a resource uri is present in the keycloak client, 
 it will be skipped
