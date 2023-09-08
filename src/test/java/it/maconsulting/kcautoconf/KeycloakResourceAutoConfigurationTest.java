@@ -31,10 +31,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Michele Arciprete
@@ -135,7 +133,7 @@ class KeycloakResourceAutoConfigurationTest {
         List<PolicyEnforcerConfig.PathConfig> paths = properties.getPolicyEnforcerConfig().getPaths();
         Assertions.assertNotNull(paths);
         Assertions.assertFalse(paths.isEmpty());
-        Assertions.assertEquals(5, paths.size());
+        Assertions.assertEquals(1, paths.size());
         paths.forEach(path -> Assertions.assertEquals("/myAwesomeMapping", path.getPath()));
     }
 
@@ -154,9 +152,10 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertNotNull(paths);
         Assertions.assertFalse(paths.isEmpty());
         Assertions.assertEquals(3, paths.size());
-        Assertions.assertEquals("/foo", paths.get(1).getPath());
-        Assertions.assertEquals("/bar", paths.get(2).getPath());
-        Assertions.assertEquals("/myAwesomeMapping", paths.get(0).getPath());
+        List<String> pathValues = paths.stream().map(PolicyEnforcerConfig.PathConfig::getPath).collect(Collectors.toList());
+        Assertions.assertEquals("/foo", paths.get(0).getPath());
+        Assertions.assertEquals("/bar", paths.get(1).getPath());
+        Assertions.assertEquals("/myAwesomeMapping", paths.get(2).getPath());
     }
 
     @Test
@@ -192,7 +191,7 @@ class KeycloakResourceAutoConfigurationTest {
         List<PolicyEnforcerConfig.PathConfig> paths = properties.getPolicyEnforcerConfig().getPaths();
         Assertions.assertNotNull(paths);
         Assertions.assertFalse(paths.isEmpty());
-        Assertions.assertEquals(5, paths.size());
+        Assertions.assertEquals(1, paths.size());
         paths.forEach(path -> Assertions.assertEquals("/", path.getPath()));
     }
 

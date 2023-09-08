@@ -56,7 +56,7 @@ public class AutoconfigurationService {
 
     private List<PolicyEnforcerConfig.PathConfig> getPathConfigurations() {
         log.info("Automatic resources and scopes configuration process started.");
-        List<PolicyEnforcerConfig.PathConfig> pathConfigList = new ArrayList<>();
+        Map<String, PolicyEnforcerConfig.PathConfig> pathConfigMap = new HashMap<>();
         Map<String, Object> beansWithAnnotation = context.getBeansWithAnnotation(RestController.class);
 
         beansWithAnnotation.forEach((name, bean) -> {
@@ -94,14 +94,23 @@ public class AutoconfigurationService {
                                     pathConfig.getMethods().add(methodConfig);
                                     pathConfig.setName(swaggerOperationService.getName(method));
                                 }
-                                pathConfigList.add(pathConfig);
+
+                                PolicyEnforcerConfig.PathConfig existingPath = pathConfigMap.get(pathConfig.getPath());
+
+                                if (existingPath != null && !pathConfig.getMethods().isEmpty()) {
+
+                                    existingPath.getMethods().add(pathConfig.getMethods().get(0));
+                                } else {
+
+                                    pathConfigMap.put(pathConfig.getPath(), pathConfig);
+                                }
                             });
                         });
                     });
                 }
             });
         });
-        return pathConfigList;
+        return new ArrayList<>(pathConfigMap.values());
     }
 
     private List<String> getClassLevelAnnotatedPaths(RequestMapping requestMappingAnnotation) {
