@@ -152,7 +152,6 @@ class KeycloakResourceAutoConfigurationTest {
         Assertions.assertNotNull(paths);
         Assertions.assertFalse(paths.isEmpty());
         Assertions.assertEquals(3, paths.size());
-        List<String> pathValues = paths.stream().map(PolicyEnforcerConfig.PathConfig::getPath).collect(Collectors.toList());
         Assertions.assertEquals("/foo", paths.get(0).getPath());
         Assertions.assertEquals("/bar", paths.get(1).getPath());
         Assertions.assertEquals("/myAwesomeMapping", paths.get(2).getPath());
