@@ -5,7 +5,7 @@
 
     <groupId>it.maconsultingitalia.keycloak</groupId>
     <artifactId>keycloak-resource-autoconf</artifactId>
-    <version>0.3.1</version>
+    <version>0.3.2</version>
 
     <name>Keycloak Resource Autoconfigurator</name>
     <description>Automatic configuration annotation to enable autodiscovery of Keycloak policy enforcement
