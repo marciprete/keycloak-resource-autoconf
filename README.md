@@ -39,11 +39,17 @@ Just add it as maven dependency:
 <dependency>
   <groupId>it.maconsultingitalia.keycloak</groupId>
   <artifactId>keycloak-resource-autoconf</artifactId>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
 </dependency>
 ```
 
 ## Features
+| Library Version | Keycloak version  |
+|-----------------|:-----------------:|
+| 0.3.0           |     <=16.0.0      |
+| 0.4.0           |     <=19.0.3      |
+
+
 From Version 0.3.0 this library adds 2 different features:
 
   * Runtime Configuration
@@ -203,8 +209,17 @@ By default, the controller is available under `/mac/configuration/export` but it
 ```
 kcautoconf.export-path=/my/custom/export/path
 ```
+
 This endpoint will be available to all the authenticated user. For security reasons, it's strongly recommended to disable
 the Json Configuration export in production. 
+
+From version 0.4.0 on, 2 new configuration parameters have been added:
+
+* kcautoconf.protect-export-path (`boolean`, default to `false`)
+* kcautoconf.export-path-access-scope (`String`, default to `configuration:expport`, only meaningful when `protect-export-path` is ste to `true`)
+
+By setting these values, the autoconfigurator assigns the `export-path-access-scope` to the configuration endpoint, and enables the policy enforcement.
+
 
 ## Known limitations
 At the moment, the endpoints are added only if the methods are mapped with `@GetMapping`, `@PostMapping`, `@PutMapping` etc.

@@ -34,6 +34,12 @@ public class AutoconfigurationService {
     @Value("${kcautoconf.export-path:/mac/configuration/export}")
     private String exportPath;
 
+    @Value("${kcautoconf.protect-export-path:true}")
+    private boolean protectExportPath;
+
+    @Value("${kcautoconf.export-path-access-scope:configuration:export}")
+    private String exportPathAccessScope;
+
     @Autowired
     public AutoconfigurationService(ApplicationContext context, KeycloakSpringBootProperties keycloakSpringBootProperties, List<SwaggerOperationService> swaggerOperationServices) {
         this.context = context;
@@ -136,8 +142,15 @@ public class AutoconfigurationService {
     public void enableConfigurationPage() {
         PolicyEnforcerConfig.PathConfig configurationPath = new PolicyEnforcerConfig.PathConfig();
         configurationPath.setPath(exportPath);
-        configurationPath.setEnforcementMode(PolicyEnforcerConfig.EnforcementMode.DISABLED);
+        if (protectExportPath) {
+            log.debug("ENFORCING protection over export path");
+            configurationPath.setEnforcementMode(PolicyEnforcerConfig.EnforcementMode.ENFORCING);
+            configurationPath.setScopes(List.of(exportPathAccessScope));
+        } else {
+            configurationPath.setEnforcementMode(PolicyEnforcerConfig.EnforcementMode.DISABLED);
+        }
         getKeycloakSpringBootProperties().getPolicyEnforcerConfig().getPaths().add(configurationPath);
+        log.info("Configuration page enabled and available @ {}", exportPath);
 
     }
 }

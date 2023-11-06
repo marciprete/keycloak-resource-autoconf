@@ -18,11 +18,11 @@ import java.util.stream.Collectors;
 @Service
 public class JsonKeycloakConfigurationGenerator implements KeycloakConfigurationGeneratorService {
 
-    private final KeycloakSpringBootProperties kcProperties;
+    private final KeycloakSpringBootProperties keycloakSpringBootProperties;
 
     @Autowired
-    public JsonKeycloakConfigurationGenerator(KeycloakSpringBootProperties kcProperties) {
-        this.kcProperties = kcProperties;
+    public JsonKeycloakConfigurationGenerator(KeycloakSpringBootProperties keycloakSpringBootProperties) {
+        this.keycloakSpringBootProperties = keycloakSpringBootProperties;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class JsonKeycloakConfigurationGenerator implements KeycloakConfiguration
         settings.setDecisionStrategy("AFFIRMATIVE");
         settings.setPolicyEnforcementMode("ENFORCING");
 
-        List<PolicyEnforcerConfig.PathConfig> paths = kcProperties.getPolicyEnforcerConfig().getPaths();
+        List<PolicyEnforcerConfig.PathConfig> paths = keycloakSpringBootProperties.getPolicyEnforcerConfig().getPaths();
         List<AuthorizedResourceDTO> resourceDTOS = new ArrayList<>();
         paths.forEach(pathConfig -> {
             if(!PolicyEnforcerConfig.EnforcementMode.DISABLED.equals(pathConfig.getEnforcementMode()) &&
