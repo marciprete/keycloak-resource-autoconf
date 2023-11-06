@@ -1,5 +1,6 @@
 package it.maconsulting.kcautoconf.services;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.adapters.springboot.KeycloakSpringBootProperties;
 import org.keycloak.representations.adapters.config.PolicyEnforcerConfig;
@@ -23,8 +24,11 @@ import java.util.function.Predicate;
 @Service
 public class AutoconfigurationService {
 
+    @Getter
     private final ApplicationContext context;
+    @Getter
     private final KeycloakSpringBootProperties keycloakSpringBootProperties;
+    @Getter
     private final List<SwaggerOperationService> swaggerOperationServices;
 
     @Value("${kcautoconf.export-path:/mac/configuration/export}")
@@ -40,18 +44,6 @@ public class AutoconfigurationService {
     public void updateKeycloakConfiguration() {
         log.info("Automatic resources and scopes configuration process started.");
         keycloakSpringBootProperties.getPolicyEnforcerConfig().getPaths().addAll(getPathConfigurations());
-    }
-
-    public ApplicationContext getContext() {
-        return context;
-    }
-
-    public List<SwaggerOperationService> getSwaggerOperationServices() {
-        return swaggerOperationServices;
-    }
-
-    public KeycloakSpringBootProperties getKeycloakSpringBootProperties() {
-        return keycloakSpringBootProperties;
     }
 
     private List<PolicyEnforcerConfig.PathConfig> getPathConfigurations() {
@@ -72,41 +64,35 @@ public class AutoconfigurationService {
                     List<String> methodPaths = extractExtraPathsFromClassMethod(requestMappingOnMethod, method);
                     List<RequestMethod> httpMethods = Arrays.asList(requestMappingOnMethod.method());
 
-                    paths.forEach(path -> {
-                        httpMethods.forEach(verb -> {
-                            methodPaths.forEach(methodPath -> {
-                                String policyEnforcementPath = buildHttpPath(path, methodPath);
-                                log.debug("Configuring {} request for path: {}", verb, policyEnforcementPath);
+                    paths.forEach(path -> httpMethods.forEach(verb -> methodPaths.forEach(methodPath -> {
+                        String policyEnforcementPath = buildHttpPath(path, methodPath);
+                        log.debug("Configuring {} request for path: {}", verb, policyEnforcementPath);
 
-                                PolicyEnforcerConfig.PathConfig pathConfig = new PolicyEnforcerConfig.PathConfig();
-                                pathConfig.setPath(policyEnforcementPath);
-                                PolicyEnforcerConfig.MethodConfig methodConfig = new PolicyEnforcerConfig.MethodConfig();
-                                methodConfig.setMethod(verb.name());
-                                Optional<SwaggerOperationService> operationServiceOption = swaggerOperationServices.stream().findFirst();
-                                if(operationServiceOption.isPresent()) {
-                                    SwaggerOperationService swaggerOperationService = operationServiceOption.get();
-                                    List<String> scopes = swaggerOperationService.getScopes(method);
-                                    if (!scopes.isEmpty()) {
-                                        scopes.stream().filter(Predicate.not(String::isBlank))
-                                                .forEach(scope -> log.debug("Found authorization scope: {}", scope));
-                                        methodConfig.setScopes(scopes);
-                                    }
-                                    pathConfig.getMethods().add(methodConfig);
-                                    pathConfig.setName(swaggerOperationService.getName(method));
-                                }
+                        PolicyEnforcerConfig.PathConfig pathConfig = new PolicyEnforcerConfig.PathConfig();
+                        pathConfig.setPath(policyEnforcementPath);
+                        PolicyEnforcerConfig.MethodConfig methodConfig = new PolicyEnforcerConfig.MethodConfig();
+                        methodConfig.setMethod(verb.name());
+                        Optional<SwaggerOperationService> operationServiceOption = swaggerOperationServices.stream().findFirst();
+                        if (operationServiceOption.isPresent()) {
+                            SwaggerOperationService swaggerOperationService = operationServiceOption.get();
+                            List<String> scopes = swaggerOperationService.getScopes(method);
+                            if (!scopes.isEmpty()) {
+                                scopes.stream().filter(Predicate.not(String::isBlank))
+                                        .forEach(scope -> log.debug("Found authorization scope: {}", scope));
+                                methodConfig.setScopes(scopes);
+                            }
+                            pathConfig.getMethods().add(methodConfig);
+                            pathConfig.setName(swaggerOperationService.getName(method));
+                        }
 
-                                PolicyEnforcerConfig.PathConfig existingPath = pathConfigMap.get(pathConfig.getPath());
+                        PolicyEnforcerConfig.PathConfig existingPath = pathConfigMap.get(pathConfig.getPath());
 
-                                if (existingPath != null && !pathConfig.getMethods().isEmpty()) {
-
-                                    existingPath.getMethods().add(pathConfig.getMethods().get(0));
-                                } else {
-
-                                    pathConfigMap.put(pathConfig.getPath(), pathConfig);
-                                }
-                            });
-                        });
-                    });
+                        if (existingPath != null && !pathConfig.getMethods().isEmpty()) {
+                            existingPath.getMethods().add(pathConfig.getMethods().get(0));
+                        } else {
+                            pathConfigMap.put(pathConfig.getPath(), pathConfig);
+                        }
+                    })));
                 }
             });
         });
@@ -126,7 +112,7 @@ public class AutoconfigurationService {
     private String buildHttpPath(String... paths) {
         StringBuilder sb = new StringBuilder();
         for (String path : paths) {
-            if (path.length() > 0) {
+            if (!path.isEmpty()) {
                 sb.append(addLeadingSlash(path));
             }
         }
@@ -135,11 +121,9 @@ public class AutoconfigurationService {
     }
 
     private List<String> extractExtraPathsFromClassMethod(RequestMapping annotation, Method method) {
-        List<String> extraPaths = Arrays.asList("");
+        List<String> extraPaths = List.of("");
         RequestMapping merged = AnnotatedElementUtils.getMergedAnnotation(method, RequestMapping.class);
-        if (merged != null &&
-                merged.path() != null &&
-                merged.path().length > 0) {
+        if (merged != null && merged.path().length > 0) {
             extraPaths = Arrays.asList(merged.path());
         }
         return extraPaths;

@@ -148,6 +148,9 @@ keycloak:
               scopes:
                 - entity:read
 ```
+> [!WARNING]<br>
+> **If you are using nickname**: Be very careful, because keycloak adapter will **only** search for resources 
+> with this value as resource name, and it will **skip the search by path**!
 
 ## Keycloak Settings Generator
 
