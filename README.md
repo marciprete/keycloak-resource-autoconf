@@ -1,5 +1,7 @@
-![workflow](https://github.com/marciprete/keycloak-resource-autoconf/actions/workflows/maven.yml/badge.svg)
+A new version of this project is available here:
+[spring-boot-keycloak-policy-enforcer](https://github.com/marciprete/spring-boot-keycloak-policy-enforcer)
 
+It works with `keycloak-policy-enforcer` and `Spring Boot 3`
 
 # Keycloak Resource Autoconfigurator for Spring Boot 2 
 
